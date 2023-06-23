@@ -2,6 +2,9 @@
 """ Console Module """
 import cmd
 import sys
+import re
+import json
+import uuid
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -115,12 +118,24 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
+		parsed_obj = {}
+		arg_list = args.split(" ", 1)
+		
+		if len(arg_list) > 1:
+			try:
+				parsed_obj = json.loads(arg_list[1])
+				parsed_obj['id'] = str(uuid.uuid4())
+			except (json.decoder.JSONDecodeError) as eer:
+				print("json errrrrrrr")
+				return
+		else:
+			if not arg_list[0]:
+				print("** class name does't exist **")
+				return
+			elif arg_list[0] not in HBNBCommand.classes:
+				print("** class doesn't exist **")
+				return
+
         new_instance = HBNBCommand.classes[args]()
         storage.save()
         print(new_instance.id)
